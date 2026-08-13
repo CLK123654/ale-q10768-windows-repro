@@ -1,0 +1,5 @@
+# 软件与数据来源
+
+主软件为Playwright兼容版本与Chromium浏览器，用于创建隔离的browser context、捕获popup、传递postMessage、采集本机请求和保存终态截图。Node.js当前长期支持版本负责本机页面服务、场景读取以及CSV与JSON导出。
+
+并发动作与预期终态来自input_data/fixtures/concurrent_link_cases.json；消息类型、槽位、超时、确认路径和报告清单来自input_data/rules/concurrent_link_contract.json；商户页与提供方页面来自input_data/app。

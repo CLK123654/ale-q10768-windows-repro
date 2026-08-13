@@ -1,0 +1,9 @@
+阅读README.md、并发场景和消息合同，确认两个槽位、操作顺序、终态、确认接口和交付路径。
+完成Playwright脚本，为每个场景创建独立browser context并打开商户绑定页。
+通过两个绑定按钮捕获账单账号与客服账号popup，分别保存窗口、state、generation、计时器与状态。
+按场景动作驱动乱序回调、单槽取消、账单重试、兄弟窗口代发、非可信窗口、用户关闭和超时。
+对每条postMessage依次核对origin、当前popup、消息类型、当前state、pending状态与result。
+只为接受的approved结果调用本地确认接口，让canceled、user_closed和timed_out分别结束对应槽位。
+按浏览器到达顺序整理场景结果、事件时间线、确认请求和槽位快照。
+为每个场景保存终态截图，从四份CSV复算link_control.json中的控制值和业务不变量。
+按scenario_id、event_index、request_index和slot连接输入、浏览器记录、报告与截图，确认双槽生命周期可追溯。

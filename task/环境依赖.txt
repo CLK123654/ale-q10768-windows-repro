@@ -1,0 +1,5 @@
+操作系统： Windows11、macOS或主流64位Linux。
+
+主软件使用Playwright兼容版本和Chromium浏览器，需支持browser context、popup捕获、postMessage、HTTP请求采集与页面截图。Node.js当前长期支持版本负责本机Web服务、场景读取、浏览器驱动和CSV与JSON导出；输入包已包含Playwright JavaScript运行时。CSV与JSON查看器用于查看结构化交付。
+
+CPU和内存满足当前并发绑定场景的浏览器运行即可；磁盘需容纳输入、浏览器临时数据、四份CSV、控制记录和场景截图；本题不使用GPU。运行账号需能读取input_data、启动本机浏览器、绑定127.0.0.1随机端口并写入同级output，处理过程无需公网。浏览器与场景处理需设置有限超时，避免弹窗或请求异常时无限等待。

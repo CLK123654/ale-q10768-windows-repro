@@ -1,0 +1,11 @@
+商户后台的账单账号和客服账号可以同时发起绑定。两个弹窗各自持有窗口引用、state、计时器和确认请求；其中一个槽位取消、重试、关闭或超时时，另一个槽位仍要按自己的消息和生命周期完成。账号平台负责人需要浏览器回归结果决定发布，安全团队还要追溯消息为何被接受或拒绝。
+
+输入数据包的input_data目录包含README.md、fixtures/concurrent_link_cases.json、rules/concurrent_link_contract.json、app/link_console.html、app/provider.html、starter/concurrent_link.spec.mjs、tools/run-task.mjs、package.json和随包Playwright运行时。场景文件保存操作顺序及预期终态，合同规定消息类型、确认接口、槽位状态、超时和报告路径，两个HTML文件提供商户绑定页与账号提供方页面。
+
+请完成output/src/concurrent_link.spec.mjs。脚本读取场景与合同，使用真实Playwright Chromium浏览器，每个场景创建新的browser context，并通过页面按钮分别打开账单账号与客服账号popup。本地Web服务只监听127.0.0.1随机端口，不连接外部账号平台。
+
+每个槽位独立维护当前popup、state、generation、计时器、状态和确认请求数。收到account_link_result后，依次核对可信origin、目标槽当前popup、消息类型、当前state、pending状态和允许的result。只有全部条件成立才接受消息；approved向合同指定接口发送一次JSON确认请求，canceled直接结束本槽。重试只替换目标槽的当前popup和state，旧窗口及旧state随即失效。用户关闭与超时分别记录本槽终态，不改变兄弟槽。
+
+按浏览器实际到达顺序生成session_results.csv、event_timeline.csv、link_requests.csv和slot_snapshot.csv，并为每个场景保存一张终态截图。event_timeline记录目标槽、来源类别、窗口匹配、类型匹配、state匹配、结果、裁决与原因；link_requests只记录实际到达本地确认接口的请求；slot_snapshot保留两个槽位的generation、state、状态、窗口关闭标记和请求数。
+
+在output/reports交付四份CSV和link_control.json，在output/evidence/screenshots按scenario_id命名截图。控制记录包含result、controls和invariants，控制值从场景、事件、请求、槽位与截图复算。四份CSV、控制记录和截图中的场景、槽位、事件及请求关系应与场景合同一致。

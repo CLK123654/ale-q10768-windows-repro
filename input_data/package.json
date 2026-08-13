@@ -1,0 +1,8 @@
+{
+  "name": "concurrent-account-link-audit",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "process": "node tools/run-task.mjs"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "message_type": "account_link_result",
+  "confirmation_path": "/api/account-links/confirm",
+  "slot_timeout_ms": 2500,
+  "slots": ["billing", "support"],
+  "terminal_statuses": ["authorized", "canceled", "user_closed", "timed_out"],
+  "accepted_results": ["approved", "canceled"],
+  "required_reports": [
+    "session_results.csv",
+    "event_timeline.csv",
+    "link_requests.csv",
+    "slot_snapshot.csv",
+    "link_control.json"
+  ]
+}

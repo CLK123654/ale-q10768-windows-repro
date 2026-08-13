@@ -1,0 +1,14 @@
+scenario_id,event_index,target_slot,origin_class,source_match,type_match,state_match,received_state,received_code,result,decision,reason
+PARALLEL_OUT_OF_ORDER,1,support,trusted,true,true,true,help-a8R4,SUP-620,approved,accepted,accepted
+PARALLEL_OUT_OF_ORDER,2,billing,trusted,true,true,true,bill-n5Q2,BIL-410,approved,accepted,accepted
+CANCEL_ONE_KEEP_ONE,1,billing,trusted,true,true,true,bill-g3D7,,canceled,accepted,accepted
+CANCEL_ONE_KEEP_ONE,2,support,trusted,true,true,true,help-t9K1,SUP-731,approved,accepted,accepted
+STALE_RETRY_CALLBACK,1,billing,trusted,false,true,false,bill-old-p2,STALE-000,approved,rejected,wrong_popup_source
+STALE_RETRY_CALLBACK,2,support,trusted,true,true,true,help-u6M8,SUP-842,approved,accepted,accepted
+STALE_RETRY_CALLBACK,3,billing,trusted,true,true,true,bill-new-v7,BIL-953,approved,accepted,accepted
+SIBLING_SOURCE_SWAP,1,billing,trusted,false,true,true,bill-w4C6,CROSS-111,approved,rejected,wrong_popup_source
+SIBLING_SOURCE_SWAP,2,billing,trusted,true,true,true,bill-w4C6,BIL-164,approved,accepted,accepted
+SIBLING_SOURCE_SWAP,3,support,trusted,true,true,true,help-b1H5,SUP-275,approved,accepted,accepted
+UNTRUSTED_ORIGIN_ISOLATED,1,billing,untrusted,false,true,true,bill-y8J3,EVIL-999,approved,rejected,untrusted_origin
+UNTRUSTED_ORIGIN_ISOLATED,2,support,trusted,true,true,true,help-f5S9,,canceled,accepted,accepted
+UNTRUSTED_ORIGIN_ISOLATED,3,billing,trusted,true,true,true,bill-y8J3,BIL-386,approved,accepted,accepted

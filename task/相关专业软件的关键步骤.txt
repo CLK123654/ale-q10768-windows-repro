@@ -1,0 +1,8 @@
+1.在input_data目录阅读README.md、concurrent_link_cases.json和concurrent_link_contract.json，查看商户绑定页、提供方页面与脚本框架。
+2.完成concurrent_link.spec.mjs，启动监听127.0.0.1随机端口的商户页、可信提供方和非可信提供方服务。
+3.用Playwright启动Chromium，为每个场景创建新的browser context并打开商户绑定页。
+4.通过getByRole定位账单账号与客服账号按钮，用waitForEvent捕获两个popup并保存槽位窗口引用。
+5.按场景顺序发送消息、重试目标槽、关闭窗口或等待超时，在父页面回读槽位状态与事件记录。
+6.采集本地确认接口收到的POST请求，按实际到达顺序整理link_requests.csv。
+7.从父页面整理session_results.csv、event_timeline.csv和slot_snapshot.csv，并按scenario_id保存终态截图。
+8.汇总场景、事件、请求、槽位和截图生成link_control.json，在input_data目录执行npm run process完成业务交付。

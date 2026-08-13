@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><title>并发账号绑定台</title>
+  <style>
+    body{font:15px system-ui;margin:0;background:#f3f6fb;color:#18243a}.wrap{max-width:900px;margin:36px auto;padding:0 20px}h1{margin-bottom:6px}.hint{color:#53647c}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:24px}.slot{background:white;border:1px solid #ccd7e5;border-radius:14px;padding:20px;box-shadow:0 4px 18px #28466b14}.state{font-family:ui-monospace,monospace;color:#6b3f00}.status{display:inline-block;margin:10px 0;padding:5px 10px;border-radius:999px;background:#e8eef7}button{border:0;border-radius:8px;background:#245fca;color:white;padding:10px 14px;font-weight:650}.audit{margin-top:18px;background:#14233a;color:#d9e7ff;border-radius:12px;padding:16px}.audit strong{color:white}
+  </style>
+</head>
+<body><main class="wrap"><h1>并发账号绑定台</h1><p class="hint">账单账号与客服账号拥有独立窗口、state、计时器和确认请求。</p><section class="grid"><article class="slot"><h2>账单账号</h2><div>state：<span class="state" id="billing-state"></span></div><div>状态：<span class="status" id="billing-status">idle</span></div><button aria-label="绑定账单账号" id="billing-button">绑定账单账号</button></article><article class="slot"><h2>客服账号</h2><div>state：<span class="state" id="support-state"></span></div><div>状态：<span class="status" id="support-status">idle</span></div><button aria-label="绑定客服账号" id="support-button">绑定客服账号</button></article></section><section class="audit"><strong>事件总数：</strong><span id="event-count">0</span>　<strong>确认请求：</strong><span id="request-count">0</span></section></main>
+<script>
+(() => {
+  const query=new URLSearchParams(location.search);
+  const trustedOrigin=query.get('trusted_origin');
+  const providerUrl=query.get('provider_url');
+  const messageType=query.get('message_type');
+  const confirmationPath=query.get('confirmation_path');
+  const timeoutMs=Number(query.get('timeout_ms'));
+  const scenarioId=query.get('scenario_id');
+  const terminal=new Set(['authorized','canceled','user_closed','timed_out']);
+  const slots={billing:{generation:0,state:query.get('billing_state'),status:'idle',popup:null,timer:null,requests:0},support:{generation:0,state:query.get('support_state'),status:'idle',popup:null,timer:null,requests:0}};
+  const audit=[];
+  let requests=0;
+  function paint(){for(const [name,slot] of Object.entries(slots)){document.getElementById(`${name}-state`).textContent=slot.state;document.getElementById(`${name}-status`).textContent=slot.status}document.getElementById('event-count').textContent=String(audit.length);document.getElementById('request-count').textContent=String(requests)}
+  function settle(){window.__terminal=Object.values(slots).every(slot=>terminal.has(slot.status));paint()}
+  function startSlot(name,state,url=providerUrl){const slot=slots[name];clearTimeout(slot.timer);slot.generation+=1;slot.state=state;slot.status='pending';window.__terminal=false;slot.popup=window.open(`${url}?slot=${encodeURIComponent(name)}&generation=${slot.generation}`,`${name}-${scenarioId}-${slot.generation}`,'width=540,height=520');const generation=slot.generation;slot.timer=setTimeout(()=>{if(slot.generation===generation&&slot.status==='pending'){slot.status='timed_out';try{slot.popup.close()}catch{}settle()}},timeoutMs);paint();return generation}
+  document.getElementById('billing-button').addEventListener('click',()=>startSlot('billing',slots.billing.state));
+  document.getElementById('support-button').addEventListener('click',()=>startSlot('support',slots.support.state));
+  window.addEventListener('message',async event=>{const payload=event.data&&typeof event.data==='object'?event.data:{};const target=String(payload.slot||'');const slot=slots[target];const row={target_slot:target,origin_class:event.origin===trustedOrigin?'trusted':'untrusted',source_match:Boolean(slot&&event.source===slot.popup),type_match:payload.type===messageType,state_match:Boolean(slot&&payload.state===slot.state),received_state:String(payload.state||''),received_code:String(payload.code||''),result:String(payload.result||''),decision:'rejected',reason:'unknown_slot'};if(slot){if(event.origin!==trustedOrigin)row.reason='untrusted_origin';else if(event.source!==slot.popup)row.reason='wrong_popup_source';else if(payload.type!==messageType)row.reason='wrong_message_type';else if(payload.state!==slot.state)row.reason='state_mismatch';else if(slot.status!=='pending')row.reason='slot_not_pending';else if(!['approved','canceled'].includes(payload.result))row.reason='unsupported_result';else{row.decision='accepted';row.reason='accepted';clearTimeout(slot.timer);if(payload.result==='approved'){const response=await fetch(confirmationPath,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({scenario_id:scenarioId,slot:target,state:slot.state,authorization_code:String(payload.code||'')})});slot.status=response.ok?'authorized':'confirmation_failed';if(response.ok){slot.requests+=1;requests+=1}}else slot.status='canceled';try{event.source.close()}catch{}}}audit.push(row);settle()});
+  setInterval(()=>{let changed=false;for(const slot of Object.values(slots)){if(slot.status==='pending'&&slot.popup&&slot.popup.closed){clearTimeout(slot.timer);slot.status='user_closed';changed=true}}if(changed)settle()},30);
+  window.__startSlot=startSlot;
+  window.__snapshot=()=>({slots:Object.fromEntries(Object.entries(slots).map(([name,slot])=>[name,{generation:slot.generation,state:slot.state,status:slot.status,popup_closed:Boolean(slot.popup&&slot.popup.closed),request_count:slot.requests}])),audit:audit.map(item=>({...item})),request_count:requests});
+  window.__ready=true;window.__terminal=false;paint();
+})();
+</script></body>
+</html>

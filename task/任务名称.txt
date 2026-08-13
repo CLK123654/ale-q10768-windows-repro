@@ -1,0 +1,1 @@
+账号绑定弹窗的Playwright来源校验、state回收与取消路径

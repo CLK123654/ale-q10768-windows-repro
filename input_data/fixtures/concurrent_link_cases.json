@@ -1,0 +1,72 @@
+[
+  {
+    "scenario_id": "PARALLEL_OUT_OF_ORDER",
+    "states": {"billing": "bill-n5Q2", "support": "help-a8R4"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "message", "from": "support", "target": "support", "state_from": "support", "result": "approved", "code": "SUP-620"},
+      {"op": "message", "from": "billing", "target": "billing", "state_from": "billing", "result": "approved", "code": "BIL-410"}
+    ],
+    "expected": {"billing_status": "authorized", "support_status": "authorized", "events": 2, "accepted": 2, "rejected": 0, "requests": 2}
+  },
+  {
+    "scenario_id": "CANCEL_ONE_KEEP_ONE",
+    "states": {"billing": "bill-g3D7", "support": "help-t9K1"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "message", "from": "billing", "target": "billing", "state_from": "billing", "result": "canceled", "code": ""},
+      {"op": "message", "from": "support", "target": "support", "state_from": "support", "result": "approved", "code": "SUP-731"}
+    ],
+    "expected": {"billing_status": "canceled", "support_status": "authorized", "events": 2, "accepted": 2, "rejected": 0, "requests": 1}
+  },
+  {
+    "scenario_id": "STALE_RETRY_CALLBACK",
+    "states": {"billing": "bill-old-p2", "support": "help-u6M8"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "retry", "slot": "billing", "state": "bill-new-v7"},
+      {"op": "message", "from": "billing_previous", "target": "billing", "state": "bill-old-p2", "result": "approved", "code": "STALE-000"},
+      {"op": "message", "from": "support", "target": "support", "state_from": "support", "result": "approved", "code": "SUP-842"},
+      {"op": "message", "from": "billing", "target": "billing", "state": "bill-new-v7", "result": "approved", "code": "BIL-953"}
+    ],
+    "expected": {"billing_status": "authorized", "support_status": "authorized", "events": 3, "accepted": 2, "rejected": 1, "requests": 2}
+  },
+  {
+    "scenario_id": "SIBLING_SOURCE_SWAP",
+    "states": {"billing": "bill-w4C6", "support": "help-b1H5"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "message", "from": "support", "target": "billing", "state_from": "billing", "result": "approved", "code": "CROSS-111"},
+      {"op": "message", "from": "billing", "target": "billing", "state_from": "billing", "result": "approved", "code": "BIL-164"},
+      {"op": "message", "from": "support", "target": "support", "state_from": "support", "result": "approved", "code": "SUP-275"}
+    ],
+    "expected": {"billing_status": "authorized", "support_status": "authorized", "events": 3, "accepted": 2, "rejected": 1, "requests": 2}
+  },
+  {
+    "scenario_id": "UNTRUSTED_ORIGIN_ISOLATED",
+    "states": {"billing": "bill-y8J3", "support": "help-f5S9"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "open_intruder"},
+      {"op": "message", "from": "intruder", "target": "billing", "state_from": "billing", "result": "approved", "code": "EVIL-999"},
+      {"op": "message", "from": "support", "target": "support", "state_from": "support", "result": "canceled", "code": ""},
+      {"op": "message", "from": "billing", "target": "billing", "state_from": "billing", "result": "approved", "code": "BIL-386"}
+    ],
+    "expected": {"billing_status": "authorized", "support_status": "canceled", "events": 3, "accepted": 2, "rejected": 1, "requests": 1}
+  },
+  {
+    "scenario_id": "CLOSE_WITH_SIBLING_TIMEOUT",
+    "states": {"billing": "bill-k7L4", "support": "help-d2V6"},
+    "actions": [
+      {"op": "open", "slot": "billing"},
+      {"op": "open", "slot": "support"},
+      {"op": "close", "slot": "billing"}
+    ],
+    "expected": {"billing_status": "user_closed", "support_status": "timed_out", "events": 0, "accepted": 0, "rejected": 0, "requests": 0}
+  }
+]

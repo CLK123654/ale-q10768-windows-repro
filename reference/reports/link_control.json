@@ -1,0 +1,34 @@
+{
+  "result": "PASS",
+  "controls": {
+    "scenario_count": 6,
+    "slot_snapshot_rows": 12,
+    "event_rows": 13,
+    "accepted_events": 10,
+    "rejected_events": 3,
+    "confirmation_requests": 8,
+    "authorized_slots": 8,
+    "canceled_slots": 2,
+    "user_closed_slots": 1,
+    "timed_out_slots": 1,
+    "retry_generation_slots": 1,
+    "screenshot_count": 6,
+    "control_error_count": 0
+  },
+  "invariants": {
+    "all_scenarios_pass": true,
+    "two_slots_per_scenario": true,
+    "event_total_matches_contract": true,
+    "accepted_total_matches_contract": true,
+    "rejected_total_matches_contract": true,
+    "request_total_matches_contract": true,
+    "confirmation_state_matches": true,
+    "no_rejected_code_confirmed": true,
+    "source_rejection_observed": true,
+    "origin_rejection_observed": true,
+    "retry_generation_observed": true,
+    "terminal_partition": true,
+    "evidence_per_scenario": true,
+    "primary_keys_unique": true
+  }
+}

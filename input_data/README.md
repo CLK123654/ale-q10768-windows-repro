@@ -1,0 +1,5 @@
+# 并发账号绑定回归
+
+fixtures/concurrent_link_cases.json保存账单账号与客服账号的并发操作和预期终态，rules/concurrent_link_contract.json给出消息、确认接口、槽位状态与交付合同。app目录包含商户绑定页和账号提供方页面，starter/concurrent_link.spec.mjs提供待完成的Playwright脚本框架。
+
+将完成的脚本保存为同级output/src/concurrent_link.spec.mjs，然后在input_data目录执行npm run process。脚本从本机随机端口提供页面，启动真实Chromium浏览器，按合同生成四份CSV、link_control.json和每个场景的终态截图。

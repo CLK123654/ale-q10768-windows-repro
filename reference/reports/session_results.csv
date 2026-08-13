@@ -1,0 +1,7 @@
+scenario_id,billing_status,support_status,event_count,accepted_events,rejected_events,confirmation_requests,passed
+PARALLEL_OUT_OF_ORDER,authorized,authorized,2,2,0,2,true
+CANCEL_ONE_KEEP_ONE,canceled,authorized,2,2,0,1,true
+STALE_RETRY_CALLBACK,authorized,authorized,3,2,1,2,true
+SIBLING_SOURCE_SWAP,authorized,authorized,3,2,1,2,true
+UNTRUSTED_ORIGIN_ISOLATED,authorized,canceled,3,2,1,1,true
+CLOSE_WITH_SIBLING_TIMEOUT,user_closed,timed_out,0,0,0,0,true

@@ -1,0 +1,13 @@
+scenario_id,slot,generation,state,status,popup_closed,request_count
+PARALLEL_OUT_OF_ORDER,billing,1,bill-n5Q2,authorized,true,1
+PARALLEL_OUT_OF_ORDER,support,1,help-a8R4,authorized,true,1
+CANCEL_ONE_KEEP_ONE,billing,1,bill-g3D7,canceled,true,0
+CANCEL_ONE_KEEP_ONE,support,1,help-t9K1,authorized,true,1
+STALE_RETRY_CALLBACK,billing,2,bill-new-v7,authorized,true,1
+STALE_RETRY_CALLBACK,support,1,help-u6M8,authorized,true,1
+SIBLING_SOURCE_SWAP,billing,1,bill-w4C6,authorized,true,1
+SIBLING_SOURCE_SWAP,support,1,help-b1H5,authorized,true,1
+UNTRUSTED_ORIGIN_ISOLATED,billing,1,bill-y8J3,authorized,true,1
+UNTRUSTED_ORIGIN_ISOLATED,support,1,help-f5S9,canceled,true,0
+CLOSE_WITH_SIBLING_TIMEOUT,billing,1,bill-k7L4,user_closed,true,0
+CLOSE_WITH_SIBLING_TIMEOUT,support,1,help-d2V6,timed_out,true,0

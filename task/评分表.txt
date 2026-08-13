@@ -1,0 +1,97 @@
+总分100分
+
+1. 交付结构与真实浏览器流程
+分值：12分
+标准答案：完成脚本、四份CSV、link_control.json和合同对应的场景截图均可读取；脚本加载随包Playwright，启动真实Chromium，并为场景创建browser context与popup。
+关键字段：output/src/concurrent_link.spec.mjs；output/reports下的四份CSV和link_control.json；output/evidence/screenshots；chromium.launch；newContext；waitForEvent；getByRole。
+容差：相对路径按Prompt逐字比较；CSV允许必要转义以及LF或CRLF行尾；截图像素可随浏览器字体产生非业务差异；Playwright与Chromium兼容版本可不同。
+失败边界：任一核心交付缺失或不可读，未启动真实浏览器，使用page.setContent或DOM替代popup流程，跨场景共用context，或主要业务记录由手工拼接产生。
+可观察证据：交付文件树、完成脚本的浏览器启动与页面操作、四份CSV、控制记录和截图文件。
+客观硬性标准：全部交付齐全，Playwright启动真实Chromium，每个场景使用独立context，popup由页面按钮打开。
+阈值：四项硬性标准全部满足。
+优先级：Gate项
+所属层级：L8运行验证或可执行行为层
+
+2. 双槽生命周期与上下文隔离
+分值：14分
+标准答案：每个场景同时维护billing和support两个槽位，各自保存当前popup、state、generation、计时器、状态和请求数；场景之间的浏览器上下文、窗口与状态不共享。
+关键字段：scenario_id；slot；popup；state；generation；timer；status；request_count；browser context；slot_snapshot.csv。
+容差：槽位记录按scenario_id与slot无序比较；generation为正整数；计时器实现可等价；状态枚举按合同精确比较。
+失败边界：串行复用单一槽位，跨场景复用context，窗口、state或计时器串槽，槽位快照缺失或重复，或generation无法反映重试。
+可观察证据：完成脚本中的场景循环与槽位状态，按联合主键连接场景合同、父页面快照和slot_snapshot.csv。
+客观硬性标准：每个场景恰有两个槽位，槽位状态各自独立，场景上下文隔离，重试只增加目标槽generation。
+阈值：全部场景满足四项硬性标准。
+优先级：高权重项
+所属层级：L6领域计算与专业规则层
+
+3. 消息来源、窗口与state裁决
+分值：17分
+标准答案：每条account_link_result同时检查可信origin、目标槽当前popup、消息类型、目标槽当前state、pending状态和允许的result；任一条件不符时拒绝消息并记录与失败条件一致的原因。
+关键字段：event.origin；event.source；payload.type；payload.slot；payload.state；payload.result；slot.popup；slot.state；slot.status；decision；reason。
+容差：条件判断顺序可不同，但同一事件的最终decision与首个业务失败原因须稳定；布尔字段容差为0；拒绝原因使用合同与页面定义的枚举。
+失败边界：缺少任一接受条件，以窗口名称代替event.source，旧窗口或旧state被接受，兄弟窗口可代发消息，非可信origin被接受，或终态槽继续消费消息。
+可观察证据：父页面message处理器、场景动作和event_timeline.csv按scenario_id与event_index连接后的条件值、裁决及原因。
+客观硬性标准：六项接受条件全部存在，接受事件全部满足条件，拒绝事件至少有一项失败，拒绝原因与失败条件一致。
+阈值：全部事件满足四项硬性标准。
+优先级：Gate项
+所属层级：L6领域计算与专业规则层
+
+4. 重试、取消、关闭与超时隔离
+分值：13分
+标准答案：重试只替换目标槽的当前popup和state；approved产生确认请求并进入authorized；canceled不发请求；用户关闭与计时到期分别进入user_closed与timed_out；任一槽终止都不改变兄弟槽。
+关键字段：retry；generation；previous popup；approved；canceled；authorized；user_closed；timed_out；confirmation_path；兄弟槽状态。
+容差：关闭轮询和超时实现可等价；终态枚举须精确；计时器的实际触发时刻允许调度波动，但不得改变合同终态。
+失败边界：重试沿用旧窗口或state，单槽终止连带兄弟槽，canceled产生请求，关闭记为超时，超时记为关闭，或终态后仍接受消息。
+可观察证据：场景动作、父页面startSlot与终态逻辑、session_results.csv、slot_snapshot.csv和link_requests.csv。
+客观硬性标准：重试回收旧身份，四类终态区分正确，只有approved发请求，兄弟槽生命周期不受影响。
+阈值：全部相关场景满足四项硬性标准。
+优先级：高权重项
+所属层级：L6领域计算与专业规则层
+
+5. 场景结果与事件时间线
+分值：12分
+标准答案：session_results.csv按场景合同输出两个槽位终态、事件数、接受数、拒绝数、确认请求数和passed；event_timeline.csv按实际到达顺序保存每条消息的目标槽、来源、匹配状态、结果、裁决与原因。
+关键字段：session_results.csv全部字段；event_timeline.csv全部字段；scenario_id；event_index；concurrent_link_cases.json的expected与actions。
+容差：场景行按合同顺序比较；事件按scenario_id与event_index比较；计数与布尔容差为0；CSV允许LF或CRLF行尾。
+失败边界：场景缺失或重复，终态与合同冲突，计数无法由事件和请求复算，事件缺失、重排或重复，或事件字段无法对应实际消息。
+可观察证据：按scenario_id连接场景合同、session_results.csv与event_timeline.csv，再从事件行复算每个场景的计数。
+客观硬性标准：场景主键完整唯一，终态与合同一致，场景计数可复算，事件顺序和字段与浏览器记录一致。
+阈值：全部场景与事件满足四项硬性标准。
+优先级：高权重项
+所属层级：L9跨产物一致性与可追溯层
+
+6. 确认请求与槽位快照
+分值：10分
+标准答案：link_requests.csv只记录被接受的approved结果，按本地接口实际到达顺序保存场景、槽位、state、授权码和HTTP状态；slot_snapshot.csv按每个场景的两个槽位记录最终generation、state、status、窗口关闭标记和请求数。
+关键字段：request_index；scenario_id；slot；state；authorization_code；http_status；generation；popup_closed；request_count。
+容差：请求按request_index精确排序；槽位按scenario_id与slot无序比较；HTTP成功状态按接口实现比较；数值和文本容差为0。
+失败边界：拒绝或canceled事件进入请求表，请求顺序与接口到达顺序不同，场景或槽位错配，state或授权码失真，快照联合主键重复，或请求数无法与请求表对平。
+可观察证据：本地确认接口处理记录、event_timeline.csv、link_requests.csv和slot_snapshot.csv的跨表连接。
+客观硬性标准：请求只来自接受的approved，请求顺序真实，槽位快照主键唯一，每槽请求数与请求表一致。
+阈值：全部请求与槽位满足四项硬性标准。
+优先级：高权重项
+所属层级：L9跨产物一致性与可追溯层
+
+7. 截图与账号绑定控制记录
+分值：10分
+标准答案：每个场景有一张以scenario_id命名的终态截图，能辨认两个槽位状态；link_control.json包含result、controls和invariants，控制值可从场景、事件、请求、槽位与截图复算，全部业务不变量成立。
+关键字段：截图文件名与PNG内容；link_control.json的result、controls和invariants；四份CSV；场景合同。
+容差：截图尺寸、字体与像素级差异不计分，文件名和可辨认终态须一致；JSON键序与缩进不计分；数字与布尔不得转为字符串。
+失败边界：截图缺失、错名、不可读取或无法辨认终态，控制记录不可解析，控制值无法复算，任一业务不变量不成立，或result不是PASS。
+可观察证据：截图清单与页面内容，解析控制记录并将controls、invariants逐项连接到场景合同和四份CSV。
+客观硬性标准：场景与截图一一对应，截图呈现双槽终态，控制值均可复算，全部业务不变量成立。
+阈值：四项硬性标准全部满足。
+优先级：高权重项
+所属层级：L9跨产物一致性与可追溯层
+
+8. 跨交付生命周期一致性
+分值：12分
+标准答案：场景结果、事件时间线、确认请求、槽位快照、截图和控制记录共享同一套scenario_id、slot、state与终态；接受或拒绝决定能沿消息条件追溯，确认请求能回到对应接受事件，槽位终态能回到最后有效动作。
+关键字段：scenario_id；slot；state；generation；decision；reason；authorization_code；status；request_count；截图路径；link_control.json。
+容差：跨文件记录按业务主键无序比较；事件与请求各自保持到达顺序；文本、枚举与计数容差为0；合法序列化差异不计分。
+失败边界：任一交付使用不同场景或槽位集合，请求无法回到接受事件，终态无法回到动作，截图与报告状态冲突，或控制汇总与明细不一致。
+可观察证据：以scenario_id、slot、event_index和request_index连接场景合同、四份CSV、截图与控制记录。
+客观硬性标准：场景与槽位集合一致，事件裁决可追溯，请求可追溯，终态与截图及控制汇总一致。
+阈值：全部场景满足四项硬性标准。
+优先级：普通项
+所属层级：L9跨产物一致性与可追溯层
